@@ -4,7 +4,7 @@
   "service": "app",
   "workspaceFolder": "/app",
   "shutdownAction": "stopCompose",
-  "forwardPorts": [3005],
+  "forwardPorts": [3005,5555],
   "postCreateCommand": "pnpm install",
   "customizations": {
     "vscode": {
