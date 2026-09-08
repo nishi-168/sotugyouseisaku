@@ -23,7 +23,7 @@ services:
     working_dir: /app
     ports:
       - "3005:3005"
-      # - "5555:5555"
+      - "5555:5555"
     command: sleep infinity         # Dev Container 用に待機させる
     depends_on:
       - db                          # db を先に起動する
