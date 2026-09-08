@@ -59,7 +59,7 @@ async function main() {
             description: "気軽に飲みましょう!",
             categoryId: categories[0].id, // 飲み会
             deadline: new Date("2026-01-10T23:59:59"),
-            organizerId: users[0].id, // 田中太郎
+            organizerId: users[1].id, // 田中太郎
         },
     });
 
