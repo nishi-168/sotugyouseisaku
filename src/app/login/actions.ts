@@ -26,6 +26,6 @@ export async function loginByEmail(formData: FormData) {
     // userIdという名前でユーザーIDをクッキーに保存している
     // cookieStore.get("userId")こんな感じで取り出す
     cookieStore.set("userId", user.id.toString());
-    // ログインが成功したらイベント一覧画面に移動させている　redirect ブラウザをparticipantに移動させて
+    // ログインが成功したらイベント一覧画面に移動させている　redirect ブラウザをparticipantに移動させて表示する
     redirect("/participant");
 }
