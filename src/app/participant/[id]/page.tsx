@@ -66,6 +66,7 @@ export default async function EventDetailPage({
             {/* 成功・エラー時の表示文 */}
             {success === "true" && <p>申込みが完了しました</p>}
             {error === "full" && <p>このイベントは満員です</p>}
+            {error === "already" && <p>既にこのイベントに参加登録済みです</p>}
             {error === "organizer" && <p>主催したイベントです</p>}
             {/* 主催者かどうか */}
             {isOrganizer ? (
