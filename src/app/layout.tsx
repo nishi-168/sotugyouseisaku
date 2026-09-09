@@ -27,6 +27,8 @@ async function Header() {
   const cookieStore = await cookies();
   const userId = cookieStore.get("userId")?.value;
   
+  // もしcookieのuseIdの値があればその値でuseIdを検索する＝ヘッダー部分にユーザー名を表示できる
+  // 無い＝未ログインなら何も表示しない
   const user = userId
   ? await prisma.user.findUnique({where: { id: Number(userId) } ,
   }):null ;
@@ -37,7 +39,9 @@ async function Header() {
     <header>
       <Link href="/participant">参加者タブ</Link>
       <Link href="/organaizer">主催者タブ</Link>
+      {/* ログイン済みならユーザー名とログアウトボタンを表示 */}
       {user ? (
+        // span formを１つの塊として扱うためにフラグメントを使用
         <>
           <span>ようこそ、{user.userName}さん</span>
           <form action={logout}>
@@ -45,6 +49,7 @@ async function Header() {
           </form> 
         </>
       ):(
+        // 未ログインならログインボタンを表示
         <Link href="/login">ログイン</Link>
       )}
     </header>
