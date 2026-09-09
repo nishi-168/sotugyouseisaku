@@ -39,6 +39,17 @@ export async function participate (eventId: number) {
         // 満員だった場合クエリパラメータをつけて詳細ページに戻す
     redirect(`/participant/${eventId}?error=full`);}
 
+    const existingParticipation = await prisma.participation.findFirst({
+        where: {
+            userId: Number(userId),
+            eventId: eventId,
+        },
+    });
+
+    if (existingParticipation) {
+        redirect(`/participant/${eventId}?error=already`);
+    }
+
     // 上の二つどちらにも当てはまらない場合こっちに進む
     // 配列になっているのはバラバラの処理ではなくどちらも一塊の処理として実行しているから
     await prisma.$transaction([
