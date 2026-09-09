@@ -29,6 +29,7 @@ export default async function ParticipantHomePage() {
                     // 各liタグにユニークな目印をつけるためにkey属性をつける
                     <li key={event.id}>
                       <Link href={`/participant/${event.id}`}>
+                        <p>イベント名: {event.name}</p>
                         <p>場所: {event.location}</p>
                         <p>カテゴリー: {event.category.name}</p>
                         <p>主催者: {event.organizer.userName}</p>
