@@ -5,15 +5,23 @@ import { prisma } from "@/lib/prisma";
 // 404を出すための関数
 import { notFound } from "next/navigation";
 
+import { cookies } from "next/headers";
+import { participate } from "./actions";
+
 // ルートパラメーターを受け取る関数
 export default async function EventDetailPage({
     params,
+    searchParams,
 }: {
     // params:URLの[id]の部分の値を取り出す書き方　idは文字列として受け取る
     params: Promise<{ id: string }>;
+    // クエリパラメータを受けっとっている　成功したか、どんなエラーかという結果をURLに載せてこのページに伝える必要がある
+    searchParams: Promise<{ error?: string; success?: string}>;
 }) {
     // paramsがPromiseとして渡される仕様のためawaitが必要
     const { id } = await params;
+    // ここあとで調べて
+    const { error,success } = await searchParams;
     // 今回は特定の１件だけ欲しいのでfindUniqueを使う
     const event = await prisma.event.findUnique({
         // ルートパラメーターのidは文字列として受け取るため、Numberで数値に変換している
@@ -34,6 +42,14 @@ export default async function EventDetailPage({
     if (!event) {
         notFound();
     }
+// cookieから今この画面を見ている人が誰かを読み取っている
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+
+    // ログイン済みかつそのIDがこのイベントの主催者と一致するか
+    const isOrganizer = userId && event.organizerId === Number(userId);
+    // 現在の参加人数が定員に達しているかどうかを判断する
+    const isFull = event._count.participations >= event.capacity;
 
     return (
         <div>
@@ -46,6 +62,22 @@ export default async function EventDetailPage({
             <p>詳細: {event.description}</p>
             <p>申込期限: {event.deadline.toLocaleString()}</p>
             <p>参加人数: {event._count.participations}/{event.capacity}人</p>
+
+            {/* 成功・エラー時の表示文 */}
+            {success === "true" && <p>申込みが完了しました</p>}
+            {error === "full" && <p>このイベントは満員です</p>}
+            {error === "organizer" && <p>主催したイベントです</p>}
+            {/* 主催者かどうか */}
+            {isOrganizer ? (
+                <p>自分が主催するイベントです</p>
+            ):(
+                // 主催者じゃない場合、actions.tsのparticipate 関数が呼ばれる。 bindはこの関数が呼ばれるときにevent.idを固定でセットしておく意味
+                <form action={participate.bind(null,event.id)}>
+                    <button type="submit" disabled={isFull}>
+                        {isFull ? "満員です" : "参加"}
+                    </button>
+                </form>
+            )}
         </div>
     );
 }
