@@ -38,7 +38,7 @@ async function Header() {
   return (
     <header>
       <Link href="/participant">参加者タブ</Link>
-      <Link href="/organaizer">主催者タブ</Link>
+      <Link href="/organizer">主催者タブ</Link>
       {/* ログイン済みならユーザー名とログアウトボタンを表示 */}
       {user ? (
         // span formを１つの塊として扱うためにフラグメントを使用
