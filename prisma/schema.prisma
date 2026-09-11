@@ -43,7 +43,9 @@ model Event {
   description           String?
   deadline              DateTime
   recruitmentType       String  @default("first_come")
-  createdAt DateTime    @default(now())
+  status                String  @default("active")
+  cancelReason          String?
+  createdAt             DateTime    @default(now())
   updatedAt             DateTime        @updatedAt
 
   organizerId           Int

@@ -56,6 +56,14 @@ export default async function EventDetailPage({
         <div>
             <Link href="/participant">← イベント一覧に戻る</Link>
             <h1>{event.name}</h1>
+            {/* キャンセルされたイベントの詳細ページで表示する中止表示
+            理由が入力されていないなら理由自体を表示させない　.cancelReason＝null*/}
+                {event.status === "cancelled" && (
+                <p>
+                    このイベントは主催者により中止されました。
+                    {event.cancelReason && `理由: ${event.cancelReason}`}
+                </p>
+                )}
             <p>場所: {event.location}</p>
             {/* toLocaleString()は日付をローカルの形式に変換するメソッド */}
             <p>日時: {event.eventDatetime.toLocaleString()}</p>
