@@ -3,7 +3,15 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 // ホームページのコンポーネント　awaitを使うためのasyncをつけている
-export default async function ParticipantHomePage() {
+// イベント一覧ページではParamsを受け取っていなかったが、今回更新が成功した時に
+// イベント一覧ページに飛ぶようにしたのでイベント一覧ページで更新が成功したメッセージを表示させたかった
+export default async function ParticipantHomePage({
+    searchParams,
+  }: {
+    searchParams: Promise <{ updated?: string }>;
+  }) {
+    const { updated } = await searchParams;
+  
     // EventテーブルをfindManyで全権取得する　ホーム画面には登録されている全イベントを表示させたいから　awaitはDBから全データを取得するまで待つ
     const events = await prisma.event.findMany({
         // Eventテーブルに紐づいている外部テーブルのデータも一緒に取得するinclude 数字ではなくて日本語で表示したいから
@@ -23,6 +31,7 @@ export default async function ParticipantHomePage() {
     return (
         <div>
             <h1>イベント一覧</h1>
+            {updated === "true" && <p>アカウント情報を更新しました</p>}
             <ul>
                 {/* イベントのリストを表示　配列のデータを繰り返し表示したいとき */}
                 {events.map((event) => (
