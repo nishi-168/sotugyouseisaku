@@ -44,6 +44,7 @@ async function Header() {
         // span formを１つの塊として扱うためにフラグメントを使用
         <>
           <span>ようこそ、{user.userName}さん</span>
+          {/* ヘッダーにアカウント情報の登録 */}
           <Link href="/account">アカウント情報</Link>
           <form action={logout}>
             <button type="submit">ログアウト</button>
