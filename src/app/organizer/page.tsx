@@ -37,6 +37,8 @@ export default async function OrganizerPage() {
                             参加人数: {event._count.participations}/{event.capacity}人
                         </p>
                     </Link>
+                    {/* 編集ページの追加 */}
+                    <Link href={`/organizer/${event.id}/edit`}>編集する</Link>
                 </li>
                 ))}
             </ul>
