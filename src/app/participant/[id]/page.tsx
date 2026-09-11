@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 
 import { cookies } from "next/headers";
 import { participate } from "./actions";
+import Link from "next/link";
 
 // ルートパラメーターを受け取る関数
 export default async function EventDetailPage({
@@ -53,6 +54,7 @@ export default async function EventDetailPage({
 
     return (
         <div>
+            <Link href="/participant">← イベント一覧に戻る</Link>
             <h1>{event.name}</h1>
             <p>場所: {event.location}</p>
             {/* toLocaleString()は日付をローカルの形式に変換するメソッド */}
