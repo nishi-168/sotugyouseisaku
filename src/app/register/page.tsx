@@ -1,4 +1,5 @@
 import { registerUser } from "./actions";
+import Link from "next/link";
 
 export default async function RegisterPage({
     searchParams,
@@ -9,6 +10,7 @@ export default async function RegisterPage({
     // 基本バリデーションはブラウザ側でやってくれる　に段階チェック用
     return (
         <div>
+            <Link href="/login">← ログイン画面に戻る</Link>
       <h1>新規登録</h1>
       {/* サーバー側で弾かれたエラーメッセージを表示する場所 */}
       {message && <p>{decodeURIComponent(message)}</p>}

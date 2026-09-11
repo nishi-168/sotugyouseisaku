@@ -25,6 +25,7 @@ export default async function OrganizerPage() {
     // ここから主催者タブのページ
     return(
         <div>
+            <Link href="/participant">← イベント一覧に戻る</Link>
             <h1>主催イベント一覧</h1>
             <Link href="/organizer/new">新しいイベントを作成する</Link>
             <ul>

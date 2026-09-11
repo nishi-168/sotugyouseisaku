@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { createEvent } from "./actions";
+import Link from "next/link";
 
 // ユーザー登録と同じ
 // createEventがバリデーションエラーの際にmessageを受け取ることができるようになっている
@@ -18,6 +19,7 @@ export default async function NewEventPage({
 
     return(
         <div>
+            <Link href="/participant">← イベント一覧に戻る</Link>
             <h1>イベント新規作成</h1>
             {message && <p>{decodeURIComponent(message)}</p>}
             <form action={createEvent}>

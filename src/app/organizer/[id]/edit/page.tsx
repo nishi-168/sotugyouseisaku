@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { updateEvent } from "./actions";
+import Link from "next/link";
+
 
 // この関数はDate型のデータを決まった書式に変換して渡す関数
 // defaultValueにはDateがアタのオブジェクトをそのまま渡すことができないから
@@ -49,6 +51,7 @@ export default async function EditEventpage({
 
     return (
     <div>
+        <Link href="/organizer">← 主催イベント一覧に戻る</Link>
       <h1>イベント編集</h1>
       {message && <p>{decodeURIComponent(message)}</p>}
       <form action={updateEventWithId}>

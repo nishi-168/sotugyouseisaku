@@ -2,6 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { updateAccount } from "./actions";
+import { getRank } from "@/lib/rank";
+import Link from "next/link";
+
 
 // 内容やページレイアウトは新規登録とほぼ同じ
 // 今回はフォームに既に登録してある情報を表示している
@@ -28,7 +31,9 @@ export default async function AccountPage({
     }
 
     return(
+        
         <div>
+            <Link href="/participant">← イベント一覧に戻る</Link>
             <h1>アカウント情報</h1>
             {message && <p>{decodeURIComponent(message)}</p>}
             {success === "true" && <p>更新しました</p>}
@@ -80,8 +85,12 @@ export default async function AccountPage({
                 <button type="submit">更新する</button>
             </form>
             {/* 更新ページ兼アカウント情報ページのため、新規登録フォームと違い参加主催回数を表示 */}
-            <p>主催回数: {user.hostedCount}回</p>
-            <p>参加回数: {user.participationCount}回</p>
+            <p>
+            主催ランク: {getRank(user.hostedCount)}(主催{user.hostedCount}回)
+            </p>
+            <p>
+            参加ランク: {getRank(user.participationCount)}(参加{user.participationCount}回)
+            </p>
         </div>
     );
 }
