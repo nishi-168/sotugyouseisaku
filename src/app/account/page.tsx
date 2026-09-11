@@ -30,6 +30,17 @@ export default async function AccountPage({
         notFound();
     }
 
+    // 自分が参加したイベント一覧を作るにはEventではなく、Participationで探す必要がある
+    // Eventテーブルには誰が参加したかの情報がないから
+    // ParticipationテーブルにはuserIdとeventIdが対応しておりそこかた詳細情報も一緒に取って来ている
+    const participations = await prisma.participation.findMany({
+        where: { userId: Number(userId) },
+        include: {
+            event: true,
+        },
+        orderBy: { appliedAt: "desc" },
+    });
+
     return(
         
         <div>
@@ -91,6 +102,19 @@ export default async function AccountPage({
             <p>
             参加ランク: {getRank(user.participationCount)}(参加{user.participationCount}回)
             </p>
+
+            <h2>参加履歴</h2>
+                <ul>
+                {participations.map((participation) => (
+                    <li key={participation.id}>
+                    <Link href={`/participant/${participation.event.id}`}>
+                        {participation.event.name}
+                        {/* statusがcancwelledであれば中止をイベント名の隣につける */}
+                        {participation.event.status === "cancelled" && "(中止)"}
+                    </Link>
+                    </li>
+                ))}
+                </ul>
         </div>
     );
 }
