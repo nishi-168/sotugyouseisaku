@@ -71,7 +71,12 @@ export default async function EventDetailPage({
             {/* toLocaleString()は日付をローカルの形式に変換するメソッド */}
             <p className="text-gray-700">日時: {event.eventDatetime.toLocaleString()}</p>
             <p className="text-gray-700">カテゴリー: {event.category.name}</p>
-            <p className="text-gray-700">主催者: {event.organizer.userName}</p>
+            <p className="text-gray-700">
+                主催者:{" "}
+                <Link href={`/users/${event.organizer.id}`} className="text-blue-600 hover:underline">
+                    {event.organizer.userName}
+                </Link>
+            </p>
             <p className="text-gray-700">詳細: {event.description}</p>
             <p className="text-gray-700">申込期限: {event.deadline.toLocaleString()}</p>
             <p className="text-gray-700">参加人数: {event._count.participations}/{event.capacity}人</p>

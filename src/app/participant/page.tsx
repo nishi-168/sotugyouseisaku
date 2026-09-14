@@ -1,6 +1,7 @@
 // 開発中にDB接続が増えてしまう問題の解決策　一箇所で作ったインスタンスを使い回している
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import EventListWithFilter from "../components/EventListWithFilter";
 
 // ホームページのコンポーネント　awaitを使うためのasyncをつけている
 // イベント一覧ページではParamsを受け取っていなかったが、今回更新が成功した時に
@@ -8,9 +9,9 @@ import { prisma } from "@/lib/prisma";
 export default async function ParticipantHomePage({
     searchParams,
   }: {
-    searchParams: Promise <{ updated?: string; categoryId: string }>;
+    searchParams: Promise <{ updated?: string; }>;
   }) {
-    const { updated  ,categoryId } = await searchParams;
+    const { updated } = await searchParams;
 
     const categories = await prisma.category.findMany({
         orderBy: { id: "asc" },
@@ -18,10 +19,8 @@ export default async function ParticipantHomePage({
   
     // EventテーブルをfindManyで全権取得する　ホーム画面には登録されている全イベントを表示させたいから　awaitはDBから全データを取得するまで待つ
     const events = await prisma.event.findMany({
-        // whereを追加　findManyが最初から開催中のイベントだけを取得するようになり、中止されたイベントは参加者タブには表示されなくなる
-        where: { status: "active",
-            ...(categoryId ? { categoryId: Number(categoryId) } : {}),
-        },
+    // whereを追加　findManyが最初から開催中のイベントだけを取得するようになり、中止されたイベントは参加者タブには表示されなくなる
+        where: { status: "active" },
         // Eventテーブルに紐づいている外部テーブルのデータも一緒に取得するinclude 数字ではなくて日本語で表示したいから
         include: {
             category: true,
@@ -113,39 +112,8 @@ export default async function ParticipantHomePage({
                     {/* 区切り線 */}
                 <hr className="border-gray-200 mb-6" />
 
-                <form method="GET" className="flex items-center gap-3 mb-6">
-                    <select name="categoryId" defaultValue={categoryId ?? ""} className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">すべてのカテゴリ</option>
-                    {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                        {category.name}
-                        </option>
-                    ))}
-                    </select>
-                    <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                        検索
-                    </button>
-                    <Link href="/participant" className="text-blue-600 hover:underline text-sm">
-                        条件をクリア
-                    </Link>
-                </form>
-
-            <ul className="space-y-3">
-                {/* イベントのリストを表示　配列のデータを繰り返し表示したいとき */}
-                {events.map((event) => (
-                    // 各liタグにユニークな目印をつけるためにkey属性をつける
-                    <li key={event.id}>
-                      <Link href={`/participant/${event.id}`} 
-                        className="block border border-gray-200 rounded-lg p-4 bg-white hover:border-blue-300">
-                        <p className="text-gray-900">イベント名: {event.name}</p>
-                        <p className="text-gray-600 text-sm">場所: {event.location}</p>
-                        <p className="text-gray-600 text-sm">カテゴリー: {event.category.name}</p>
-                        <p className="text-gray-600 text-sm">主催者: {event.organizer.userName}</p>
-                        <p className="text-gray-600 text-sm">参加人数: {event._count.participations}/{event.capacity}人</p>
-                      </Link>
-                    </li>
-                ))}
-            </ul>
+            {/* カテゴリでの絞り込みと一覧表示は、ブラウザ側(useState)で完結させるためEventListWithFilterに任せる */}
+            <EventListWithFilter categories={categories} events={events} />
         </div>
     );
 }

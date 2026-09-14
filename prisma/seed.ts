@@ -254,8 +254,25 @@ async function main() {
         },
     });
 
+
+// 主催回数・参加回数を、実際のデータをもとに集計して反映する
+for (const user of users) {
+  const hostedCount = await prisma.event.count({
+    where: { organizerId: user.id },
+  });
+  const participationCount = await prisma.participation.count({
+    where: { userId: user.id },
+  });
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { hostedCount, participationCount },
+  });
+}
+
+console.log("シード値投入完了");
     console.log("シード値投入完了")
 }
+
 
 main()
     .catch((e) => {
@@ -265,3 +282,4 @@ main()
     .finally(async () => {
         await prisma.$disconnect();
     });
+
