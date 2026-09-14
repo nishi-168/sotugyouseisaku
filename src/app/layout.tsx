@@ -36,24 +36,36 @@ async function Header() {
   
 
   return (
-    <header>
-      <Link href="/participant">参加者タブ</Link>
-      <Link href="/organizer">主催者タブ</Link>
+    <header className="border-b border-gray-200 bg-white">
+      <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="flex gap-4">
+          <Link href="/participant" className="text-gray-700 hover:text-blue-600">
+            参加者タブ</Link>
+          <Link href="/organizer" className="text-gray-700 hover:text-blue-600">
+            主催者タブ</Link>
+        </div>
+        
       {/* ログイン済みならユーザー名とログアウトボタンを表示 */}
       {user ? (
-        // span formを１つの塊として扱うためにフラグメントを使用
-        <>
-          <span>ようこそ、{user.userName}さん</span>
+        <div className="flex items-center gap-4">
+
+          <Link href="/account" className="text-gray-700 hover:text-blue-600">
+            アカウント情報</Link>
+        
+          <span className="text-gray-500 text-sm">ようこそ、{user.userName}さん</span>
           {/* ヘッダーにアカウント情報の登録 */}
-          <Link href="/account">アカウント情報</Link>
+          
           <form action={logout}>
-            <button type="submit">ログアウト</button>
+            <button type="submit" className="bg-gray-200 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-300">
+              ログアウト</button>
           </form> 
-        </>
+        </div>
       ):(
         // 未ログインならログインボタンを表示
-        <Link href="/login">ログイン</Link>
+        <Link href="/login" className="text-blue-600 hover:text-blue-700">
+          ログイン</Link>
       )}
+      </div>
     </header>
   );
 }
@@ -64,7 +76,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-gray-50">
         <Header />
         {children}
       </body>
