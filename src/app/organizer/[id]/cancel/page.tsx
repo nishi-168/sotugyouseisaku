@@ -33,16 +33,24 @@ export default async function CancelEventPage({
   const cancelEventWithId = cancelEvent.bind(null, event.id);
 
   return (
-    <div>
-      <Link href="/organizer">← 主催イベント一覧に戻る</Link>
-      <h1>イベントを中止する</h1>
-      <p>「{event.name}」を中止します。この操作は取り消せません。</p>
-      <form action={cancelEventWithId}>
+    <div className="max-w-md mx-auto px-4 py-10">
+      <Link href="/organizer" className="text-blue-600 hover:underline text-sm">
+        ← 主催イベント一覧に戻る
+      </Link>
+      <h1 className="text-2xl font-bold text-gray-900 mt-2 mb-4">イベントを中止する</h1>
+      <p className="bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2 mb-4">
+        「{event.name}」を中止します。この操作は取り消せません。
+      </p>
+      <form action={cancelEventWithId} className="space-y-4">
         <div>
-          <label>中止理由(参加者に表示されます)</label>
-          <textarea name="cancelReason" />
+          <label className="block text-sm text-gray-700 mb-1">
+            中止理由(参加者に表示されます)
+          </label>
+          <textarea name="cancelReason" rows={4} className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
-        <button type="submit">中止を確定する</button>
+        <button type="submit" className="text-red-500 px-4 py-2 rounded w-full hover:bg-red-700">
+            中止を確定する
+        </button>
       </form>
     </div>
   );

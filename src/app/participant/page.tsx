@@ -55,7 +55,7 @@ export default async function ParticipantHomePage({
             deadline:"asc",
         },
         // 上位5件
-        take: 5,
+        take: 4,
     });
 
     // 新着イベントの表示
@@ -74,43 +74,47 @@ export default async function ParticipantHomePage({
     });
 
     return (
-        <div>
-            <h1>イベント一覧</h1>
-            {updated === "true" && <p>アカウント情報を更新しました</p>}
+        <div className="max-w-2xl mx-auto px-4 py-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">イベント一覧</h1>
+            {updated === "true" &&
+                <p className="bg-green-50 text-green-700 border border-green-200 rounded px-3 py-2 mb-6">
+                    アカウント情報を更新しました
+                </p>}
             {/* divではなくsectionという１つの意味のあるまとまりとすることでCSSなどが当てやすくなる */}
-                <section>
-                    <h2>締め切り間近！！</h2>
-                    <ul>
+                <section className="mb-8">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-3">締め切り間近！！</h2>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {upcomingDeadlineEvents.map((event) => (
                             <li key={event.id}>
-                                <Link href={`/participant/${event.id}`}>
-                                    <p>{event.name}</p>
-                                    <p>申込期限: {event.deadline.toLocaleString()}</p>
+                                <Link href={`/participant/${event.id}`}
+                                    className="block border border-orange-200 bg-orange-50 rounded-lg p-3 hover:border-orange-400">
+                                    <p className="font-medium text-gray-900">{event.name}</p>
+                                    <p className="text-sm text-orange-700">申込期限: {event.deadline.toLocaleString()}</p>
                                 </Link>
                             </li>
                         ) )}
                     </ul>
                 </section>
 
-                <section>
-                    <h2>新着イベント!!</h2>
-                    <ul>
+                <section className="mb-8">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-3">新着イベント!!</h2>
+                    <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {/* さっき作ったクエリから.mapで取得して表示させている */}
                     {newEvents.map((event) => (
                         <li key={event.id}>
-                        <Link href={`/participant/${event.id}`}>
-                            <p>{event.name}</p>
-                            <p>カテゴリー: {event.category.name}</p>
+                        <Link href={`/participant/${event.id}`} className="block border border-blue-200 bg-blue-50 rounded-lg p-3 hover:border-blue-400">
+                            <p className="font-medium text-gray-900">{event.name}</p>
+                            <p className="text-sm text-blue-700">カテゴリー: {event.category.name}</p>
                         </Link>
                         </li>
                     ))}
                     </ul>
                 </section>
                     {/* 区切り線 */}
-                <hr />
+                <hr className="border-gray-200 mb-6" />
 
-                <form method="GET">
-                    <select name="categoryId" defaultValue={categoryId ?? ""}>
+                <form method="GET" className="flex items-center gap-3 mb-6">
+                    <select name="categoryId" defaultValue={categoryId ?? ""} className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">すべてのカテゴリ</option>
                     {categories.map((category) => (
                         <option key={category.id} value={category.id}>
@@ -118,21 +122,26 @@ export default async function ParticipantHomePage({
                         </option>
                     ))}
                     </select>
-                    <button type="submit">検索</button>
-                    <Link href="/participant">条件をクリア</Link>
+                    <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        検索
+                    </button>
+                    <Link href="/participant" className="text-blue-600 hover:underline text-sm">
+                        条件をクリア
+                    </Link>
                 </form>
 
-            <ul>
+            <ul className="space-y-3">
                 {/* イベントのリストを表示　配列のデータを繰り返し表示したいとき */}
                 {events.map((event) => (
                     // 各liタグにユニークな目印をつけるためにkey属性をつける
                     <li key={event.id}>
-                      <Link href={`/participant/${event.id}`}>
-                        <p>イベント名: {event.name}</p>
-                        <p>場所: {event.location}</p>
-                        <p>カテゴリー: {event.category.name}</p>
-                        <p>主催者: {event.organizer.userName}</p>
-                        <p>参加人数: {event._count.participations}/{event.capacity}人</p>
+                      <Link href={`/participant/${event.id}`} 
+                        className="block border border-gray-200 rounded-lg p-4 bg-white hover:border-blue-300">
+                        <p className="text-gray-900">イベント名: {event.name}</p>
+                        <p className="text-gray-600 text-sm">場所: {event.location}</p>
+                        <p className="text-gray-600 text-sm">カテゴリー: {event.category.name}</p>
+                        <p className="text-gray-600 text-sm">主催者: {event.organizer.userName}</p>
+                        <p className="text-gray-600 text-sm">参加人数: {event._count.participations}/{event.capacity}人</p>
                       </Link>
                     </li>
                 ))}

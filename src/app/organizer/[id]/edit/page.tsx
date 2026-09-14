@@ -50,40 +50,44 @@ export default async function EditEventpage({
     const updateEventWithId = updateEvent.bind(null, event.id);
 
     return (
-    <div>
-        <Link href="/organizer">← 主催イベント一覧に戻る</Link>
-      <h1>イベント編集</h1>
-      {message && <p>{decodeURIComponent(message)}</p>}
-      <form action={updateEventWithId}>
+    <div className="max-w-md mx-auto px-4 py-10">
+        <Link href="/organizer" className="text-blue-600 hover:underline text-sm">
+          ← 主催イベント一覧に戻る
+        </Link>
+      <h1 className="text-2xl font-bold text-gray-900 mt-2 mb-6">イベント編集</h1>
+      {message && <p className="bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2 mb-4">
+        {decodeURIComponent(message)}</p>}
+      <form action={updateEventWithId} className="space-y-4">
         <div>
-          <label>イベント名</label>
-          <input type="text" name="name" defaultValue={event.name} required />
+          <label className="block text-sm text-gray-700 mb-1">イベント名</label>
+          <input type="text" name="name" defaultValue={event.name} required className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
-          <label>場所</label>
-          <input type="text" name="location" defaultValue={event.location} required />
+          <label className="block text-sm text-gray-700 mb-1">場所</label>
+          <input type="text" name="location" defaultValue={event.location} required className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
         </div>
         <div>
-          <label>開催日時</label>
+          <label className="block text-sm text-gray-700 mb-1">開催日時</label>
           <input
             type="datetime-local"
             name="eventDatetime"
             defaultValue={toDatetimeLocal(event.eventDatetime)}
             required
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
-          <label>募集人数</label>
-          <input type="number" name="capacity" defaultValue={event.capacity} min="1" required />
+          <label className="block text-sm text-gray-700 mb-1">募集人数</label>
+          <input type="number" name="capacity" defaultValue={event.capacity} min="1" required className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
         </div>
         <div>
-          <label>詳細</label>
+          <label className="block text-sm text-gray-700 mb-1">詳細</label>
           {/* 任意項目 */}
-          <textarea name="description" defaultValue={event.description ?? ""} />
+          <textarea name="description" defaultValue={event.description ?? ""} rows={4} className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
         </div>
         <div>
-          <label>カテゴリ</label>
-          <select name="categoryId" defaultValue={event.categoryId} required>
+          <label className="block text-sm text-gray-700 mb-1">カテゴリ</label>
+          <select name="categoryId" defaultValue={event.categoryId} required className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">選択してください</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
@@ -93,12 +97,13 @@ export default async function EditEventpage({
           </select>
         </div>
         <div>
-          <label>申込期限</label>
+          <label className="block text-sm text-gray-700 mb-1">申込期限</label>
           <input
             type="datetime-local"
             name="deadline"
             defaultValue={toDatetimeLocal(event.deadline)}
             required
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button type="submit">更新する</button>
