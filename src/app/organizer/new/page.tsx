@@ -1,6 +1,9 @@
+// 新規登録の画面の部分
 import { prisma } from "@/lib/prisma";
 import { createEvent } from "./actions";
 import Link from "next/link";
+
+
 
 // ユーザー登録と同じ
 // createEventがバリデーションエラーの際にmessageを受け取ることができるようになっている
@@ -27,6 +30,8 @@ export default async function NewEventPage({
             </h1>
             {message && <p className="bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2 mb-4">
                 {decodeURIComponent(message)}</p>}
+                {/* 今回はbindが不要 */}
+                {/* 今回新しく作るため、どのイベントを操作するのかという概念が存在しないから */}
             <form action={createEvent} className="space-y-4">
                 <div>
                     <label className="block text-sm text-gray-700 mb-1">イベント名</label>
@@ -68,5 +73,6 @@ export default async function NewEventPage({
                 </button>
             </form>
         </div>
+        // defaultValueは必要なし
     );
 }

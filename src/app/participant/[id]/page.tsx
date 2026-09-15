@@ -1,5 +1,6 @@
 // [id]というフォルダを挟むことで可変の値となり、URLのparticipant/idの部分を受け取ることができるようになる
 // ルートパラメーター
+// 特定のイベントの詳細ページを表示するファイル
 
 import { prisma } from "@/lib/prisma";
 // 404を出すための関数
@@ -9,7 +10,8 @@ import { cookies } from "next/headers";
 import { participate } from "./actions";
 import Link from "next/link";
 
-// ルートパラメーターを受け取る関数
+// ルートパラメーターとクエリパラメータの両方を受け取る関数
+// [id]などでどのイベントか判断しつつ　？以降のエラー内容なども受け取っている
 export default async function EventDetailPage({
     params,
     searchParams,
@@ -21,10 +23,11 @@ export default async function EventDetailPage({
 }) {
     // paramsがPromiseとして渡される仕様のためawaitが必要
     const { id } = await params;
-    // ここあとで調べて
+    // searchparamsからerrorとsuccessを取り出している
     const { error,success } = await searchParams;
     // 今回は特定の１件だけ欲しいのでfindUniqueを使う
     const event = await prisma.event.findUnique({
+
         // ルートパラメーターのidは文字列として受け取るため、Numberで数値に変換している
         where: { id: Number(id) },
         // ここからはincludeで外部テーブルのデータも一緒に取得するためのもの
@@ -47,7 +50,7 @@ export default async function EventDetailPage({
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
 
-    // ログイン済みかつそのIDがこのイベントの主催者と一致するか
+    // ログイン済みのユーザーかつそのIDがこのイベントの主催者と一致するか
     const isOrganizer = userId && event.organizerId === Number(userId);
     // 現在の参加人数が定員に達しているかどうかを判断する
     const isFull = event._count.participations >= event.capacity;
@@ -96,6 +99,8 @@ export default async function EventDetailPage({
                 <p className="text-gray-600">自分が主催するイベントです</p>
             ):(
                 // 主催者じゃない場合、actions.tsのparticipate 関数が呼ばれる。 bindはこの関数が呼ばれるときにevent.idを固定でセットしておく意味
+                // この関数が実行されたらeventIdには今見ているeventIdを使ってという意味
+                // 参加フォームには入力項目がなくどのイベントに参加するか示す必要があるため
                 <form action={participate.bind(null,event.id)}>
                     <button type="submit" disabled={isFull}
                         className={
