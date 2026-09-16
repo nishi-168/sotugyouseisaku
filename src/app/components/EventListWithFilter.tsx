@@ -87,7 +87,7 @@ export default function EventListWithFilter({
               className="block border border-gray-200 rounded-lg p-4 bg-white hover:border-blue-300"
             >
               <h2 className="text-gray-900">・{event.name}</h2>
-              <p className="text-gray-900">場所: {event.location}</p>
+              <p className="text-gray-900 text-base">場所: {event.location}</p>
               <p className="text-gray-600 text-sm">カテゴリー: {event.category.name}</p>
               <p className="text-gray-600 text-sm">主催者: {event.organizer.userName}</p>
               <p className="text-gray-600 text-sm">
