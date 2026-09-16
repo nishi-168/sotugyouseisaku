@@ -6,13 +6,17 @@ import Link from "next/link";
 
 
 // この関数はDate型のデータを決まった書式に変換して渡す関数
-// defaultValueにはDateがアタのオブジェクトをそのまま渡すことができないから
+// defaultValueにはDate型のオブジェクトをそのまま渡すことができないから
+// datetime-localが要求する形式は日付や時間が２桁で表記される必要がある　１桁の場合認識してくれない
 function toDatetimeLocal(date: Date) {
     // pad関数は7を07として渡すやつ　前も似たようなのが出てきた
+    // n.toString()：数値を文字列に変換。.padStart()今回は文字列の長さが２になるように０で調整する
     const pad = (n: number) => n.toString().padStart(2, "0");
+    // 西暦を取得　月を取得＋１　日を取得　T：日付と時刻を区切る　これはdatetime-local形式で決められた記号　時間　分を取得
     return `${date.getFullYear()}-${pad(date.getMonth() +1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+// id部分と？以降を受け取っている　どのイベントを編集するか、エラーが起きていないかの両方の情報が必要
 export default async function EditEventpage({
     params,
     searchParams,
@@ -42,13 +46,16 @@ export default async function EditEventpage({
         redirect(`/organizer?message=${encodeURIComponent("自分が主催するイベントのみ編集できます")}`);
     }
 
+    // カテゴリーのプルダウンに表示する選択肢を取得している
     const categories = await prisma.category.findMany({
     orderBy: { id: "asc" },
     });
 
-    // updateEvent関数にあらかじめevent.idを持たせた関数を作っている？
+    // updateEvent関数にあらかじめevent.idを持たせた関数を作っている
     const updateEventWithId = updateEvent.bind(null, event.id);
 
+    // 新規作成フォームとほとんど同じだがdefaultValue={event.name}などの今DBに保存されている値を、あらかじめ入力欄に表示しておく
+    // これによって変更したい部分だけ変えれば済むようになる
     return (
     <div className="max-w-md mx-auto px-4 py-10">
         <Link href="/organizer" className="text-blue-600 hover:underline text-sm">
@@ -71,6 +78,7 @@ export default async function EditEventpage({
           <input
             type="datetime-local"
             name="eventDatetime"
+            // toDatetimeLocalを「通してから渡すことで正しく認識できる形にする
             defaultValue={toDatetimeLocal(event.eventDatetime)}
             required
             className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -106,7 +114,7 @@ export default async function EditEventpage({
             className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        <button type="submit">更新する</button>
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700">更新する</button>
       </form>
     </div>
   );

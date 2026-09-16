@@ -1,9 +1,12 @@
+
+// DB操作、Cookie操作、リダイレクト、404表示、中止処理、Linkによるページ遷移などのインポート
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { cancelEvent } from "./actions";
 import Link from "next/link";
 
+// URLの[id]部分を受け取っている
 export default async function CancelEventPage({
   params,
 }: {
@@ -11,13 +14,14 @@ export default async function CancelEventPage({
 }) {
   const { id } = await params;
 
+//   ログイン状態を確認している。中止という重要な操作をする前に誰が操作しているかを確定させる
   const cookieStore = await cookies();
   const userId = cookieStore.get("userId")?.value;
-
+// ログインしていなかったらログインへ
   if (!userId) {
     redirect("/login");
   }
-
+// 指定されたIDのイベントを取得し、存在しなければ404ページを表示する
   const event = await prisma.event.findUnique({
     where: { id: Number(id) },
   });
@@ -25,11 +29,14 @@ export default async function CancelEventPage({
   if (!event) {
     notFound();
   }
-
+// イベントの主催者IDと、今ログインしている人のIDを比較し一致しない場合は主催イベント一覧に追い返している
+// URLを直接いじって侵入されるのを防ぐため
   if (event.organizerId !== Number(userId)) {
     redirect(`/organizer?message=${encodeURIComponent("自分が主催するイベントのみ中止できます")}`);
   }
 
+//   cancelEventという関数にevent.Idを固定した新しい関数雨を作っている
+// event.IdとformDataの２つの引数が必要だがフォームのactionにはformDataだけを受け取る関数しか渡せないから
   const cancelEventWithId = cancelEvent.bind(null, event.id);
 
   return (

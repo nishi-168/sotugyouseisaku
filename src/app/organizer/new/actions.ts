@@ -7,26 +7,26 @@ import * as yup from "yup";
 
 // バリデーションの定義
 const eventSchema = yup.object({
-    name: yup.string().trim().required("イベント名を入力してください"),
-    location: yup.string().required("場所を入力してください"),
-    eventDatetime:yup
-        .date()
-        .typeError("開催日を正しく入力してください")
-        .required("開催日を入力してください"),
-    capacity: yup
-        .number()
-        .typeError("募集人数は数字で入力してください")
-        .min(1,"募集人数を入力してください")
-        .required("募集人数を入力してください"),
-    description: yup.string(),
-    categoryId: yup
-        .number()
-        .typeError("カテゴリを選択してください")
-        .required("カテゴリを選択してください"),
-    deadline: yup
-        .date()
-        .typeError("申込期限を正しく入力してください")
-        .required("申込期限を入力してください"),
+  name: yup.string().required("イベント名を入力してください"),
+  location: yup.string().required("場所を入力してください"),
+  eventDatetime: yup
+    .date()
+    .typeError("開催日を正しく入力してください")
+    .required("開催日を入力してください"),
+  capacity: yup
+    .number()
+    .typeError("募集人数は数字で入力してください")
+    .min(1, "募集人数を入力してください")
+    .required("募集人数を入力してください"),
+  description: yup.string(),
+  categoryId: yup
+    .number()
+    .typeError("カテゴリを選択してください")
+    .required("カテゴリを選択してください"),
+  deadline: yup
+    .date()
+    .typeError("申込期限を正しく入力してください")
+    .required("申込期限を入力してください"),
 });
 
 
@@ -40,6 +40,8 @@ export async function createEvent(formData: FormData) {
         redirect("/login");
     }
 
+    // フォームから送られてきた７項目を１つのオブジェクトにまとめている
+    // capacityなどの数値である項目も一旦文字列にして、後でyupのNumber()が自動的に行ってくれる
     const rawData = {
         name: formData.get("name") as string,
         location: formData.get("location") as string,
@@ -50,7 +52,8 @@ export async function createEvent(formData: FormData) {
         deadline: formData.get("deadline") as string,
     };
 
-    let validatedData 
+    let validatedData ;
+
     try {
         validatedData = await eventSchema.validate(rawData);
     } catch (e) {
@@ -66,7 +69,11 @@ export async function createEvent(formData: FormData) {
         );
     }
     // バリデーションを通過したデータでEventレコードを作成
-    const event = await prisma.event.create({
+    // ここでは$transactionを採用した　参加登録が失敗したが　レコードの回数が＋されないように
+    // $transactionは配列の中に入れた処理を順番に実行しそれぞれの結果を配列として返す
+    // 分割代入でeventを受け取っているのは更新後のuser.updateはこの後のコードで使わないから
+    const [event] = await prisma.$transaction([
+        prisma.event.create({
         data: {
             name: validatedData.name,
             location: validatedData.location,
@@ -78,13 +85,16 @@ export async function createEvent(formData: FormData) {
             deadline: validatedData.deadline,
             organizerId: Number(userId),
         },
-    });
+    }),
     // レコードを作ったら主催者回数を１増やす
-    await prisma.user.update({
+     prisma.user.update({
         where: { id : Number(userId) },
         data: {hostedCount: {increment: 1} },
-    });
+    }),
+    ])
 
+
+    // ここでeventは使うので分割代入でeventという変数名で受け取る必要があった
     redirect(`/participant/${event.id}?created=true`);
     
 }

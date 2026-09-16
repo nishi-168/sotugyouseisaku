@@ -1,11 +1,17 @@
+// actions.tsで作ったregisterUser関数を読み込んでいる
 import { registerUser } from "./actions";
 import Link from "next/link";
 
+// seaechParamsはURLの？以降の部分（クエリパラメータ）を受け取る引数を用意している
 export default async function RegisterPage({
+  // 今回このページには[id]のような可変するものがないからsearchPaarams
     searchParams,
 }: {
+  // searchParamsはURLに含まれる情報　例(?message=名前を入力してくださいのような部分)を受け取って,messageという変数に取り出す
+  // 実際にエラー文を表示しているのはmessage
     searchParams: Promise<{ message?: string }>;
 }) {
+  // searchParamsというPromiseの中身をawaitで取り出し、messageの値だけを取り出している
     const { message } = await searchParams;
     // 基本バリデーションはブラウザ側でやってくれる　に段階チェック用
     return (
@@ -16,8 +22,11 @@ export default async function RegisterPage({
           <h1  className="text-2xl font-bold text-gray-900 mt-2 mb-6">新規登録</h1>
           {/* サーバー側で弾かれたエラーメッセージを表示する場所 */}
           {message && <p  className="bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2 mb-4">
+                        {/* actions.ts側でURLように変更されていたメッセージを、元の読める日本語の文字列に戻している
+                        エンコードとデコードは必ずセットで使う */}
                           {decodeURIComponent(message)}
                       </p>}
+                      {/* action={registerUser}によってフォームが送信されるとactions.tsのregister関数が呼ばれる */}
           <form action={registerUser}  className="space-y-4">
             <div>
               <label  className="block text-sm text-gray-700 mb-1">名前</label>
@@ -26,6 +35,7 @@ export default async function RegisterPage({
             <div>
               <label  className="block text-sm text-gray-700 mb-1">生年月日</label>
               <div  className="flex items-center gap-2">
+                {/* 分けた理由：input type="date" にすると古い生年月日を選ぶ際に大変だったので直接打ち込めるようにした*/}
             <input 
                 type="number" 
                 name="birthYear" 

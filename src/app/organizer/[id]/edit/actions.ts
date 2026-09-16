@@ -6,6 +6,9 @@ import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import * as yup from "yup";
 
+// createEventで使っていたスキーマと全く同じ内容
+// 新規作成と編集では全く同じルールで問題ないから
+// 同じ内容ならここだけ切り出してimportすればよかったかも
 const eventSchema = yup.object({
   name: yup.string().required("イベント名を入力してください"),
   location: yup.string().required("場所を入力してください"),
@@ -54,6 +57,8 @@ export async function updateEvent(eventId: number, formData: FormData) {
     redirect(`/organizer?message=${encodeURIComponent("自分が主催するイベントのみ編集できます")}`);
   }
 
+  // フォームから送られてきた各項目の値を、１つのオブジェクトにまとめている
+  // 新規作成の時と同じ形
   const rawData ={
     name: formData.get("name") as string,
     location: formData.get("location") as string,
@@ -64,23 +69,37 @@ export async function updateEvent(eventId: number, formData: FormData) {
     deadline: formData.get("deadline") as string,
   };
 
+  // validatedDataという名前の変数をあらかじめ作っておく
+  // この後のtry catchで実際に値を入れている
+  // ここで定義しておかないとvalidateDataがtryの中でしか扱えなくなってしまう
+  // constだと二度と中身を変えられない箱になってしまうので空の箱のままになってしまうが、
+  // 最初は空、そのあとで一回だけ値を入れるという使い方をしたいから後から値を入れられるletを使っている
   let validatedData;
 
+// 新規作成と同じyupでバリデーションを行いエラーがあれば編集ページにエラーメッセージ付きで戻している
+// 新規作成と違う部分はリダイレクト先が${eventId}というどのイベントの編集画面に戻すかも指定している
   try {
     validatedData = await eventSchema.validate(rawData);
+    // （e）catchで受け取ったエラー情報　
   } catch (e) {
     if (e instanceof yup.ValidationError) {
+      // encodeURIComponentはURLの中に文字列を安全に埋め込める形に変換するための標準機能
+      // URL構造を壊さないようにするもの
         redirect(`/organizer/${eventId}/edit?message=${encodeURIComponent(e.message)}`);
     }
     throw e;
   }
 
+  // 新規作成の時と同じ理由でyupだけでは複数項目のチェックがしづらいため個別で条件式を書いている
+  // yupで.test()という書き方もあったがthis.parantという複雑な書き方だったので
+  // ここだけであればifで書いても労力にならないし、読む人も理解しやすそうだった
   if (validatedData.deadline > validatedData.eventDatetime) {
     redirect(
         `/organizer/${eventId}/edit?message=${encodeURIComponent("申込期限は開催日より前に設定してください")}`
     );
   }
 //   登録フォームとは違いupdateを行なっている
+// organaizerIdの設定はない　新規登録ではなく編集者が誰なのかは最初から決まっていて変わることがない
   await prisma.event.update({
     where: { id: eventId },
     data: {
