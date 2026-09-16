@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# イベント管理アプリ
 
-## Getting Started
+IT研修の卒業制作として開発した、イベント主催者と参加者をつなげるWebアプリケーションです。小規模な飲み会からスタジアムレベルのライブまで、幅広い規模のイベントを募集・参加できることを目指しています。
 
-First, run the development server:
+## 概要
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- ログイン機能(パスワード認証)は使わず、メールアドレスによる検索でユーザーを識別する疑似ログイン方式を採用
+- イベントの作成・一覧表示・検索・参加申込み・編集・中止まで、CRUD操作を一通り実装
+- 参加回数・主催回数に応じたランク表示など、遊び心のある機能も追加
+
+## 技術スタック
+
+| カテゴリ | 技術 |
+|---|---|
+| 言語 | TypeScript |
+| フロントエンド | React, Next.js (App Router) |
+| ORM | Prisma |
+| データベース | PostgreSQL |
+| 入力検証 | yup |
+| スタイリング | Tailwind CSS |
+
+## 主な機能
+
+### 参加者向け
+
+- メールアドレスによるユーザー識別(疑似ログイン)/新規登録
+- イベント一覧表示、カテゴリによる絞り込み検索
+- 締切間近・新着イベントのピックアップ表示
+- イベント詳細の確認、参加申込み(定員・重複・主催者本人チェックあり)
+- 主催者の公開プロフィール閲覧
+- アカウント情報の閲覧・編集、参加履歴の確認、ランク表示
+
+### 主催者向け
+
+- イベントの新規作成・編集
+- 主催イベント一覧の確認(開催中・中止済みを含む)
+- イベントの中止(論理削除。中止理由の記録が可能)
+
+## ディレクトリ構成
+
+```
+src/
+├── app/            … 画面(App Router)。フォルダ構造がそのままURLに対応
+│   ├── login/
+│   ├── register/
+│   ├── account/
+│   ├── participant/
+│   │   └── [id]/
+│   ├── organizer/
+│   │   ├── new/
+│   │   └── [id]/
+│   │       ├── edit/
+│   │       └── cancel/
+│   └── users/
+│       └── [id]/
+├── components/     … 複数画面から使うUIコンポーネント
+├── lib/            … Prisma Client、ランク判定などの共通処理
+└── generated/      … Prisma Client自動生成コード
+
+prisma/
+├── schema.prisma   … テーブル定義
+└── seed.ts         … 初期データ投入スクリプト
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+詳細な設計判断の理由や画面ごとの構成は、`docs/`内の設計書・要件定義書を参照してください。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## セットアップ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# 依存パッケージのインストール
+pnpm install
 
-## Learn More
+# .envにDATABASE_URLを設定した上で、マイグレーションを実行
+pnpm exec prisma migrate dev
 
-To learn more about Next.js, take a look at the following resources:
+# 初期データの投入
+pnpm exec prisma db seed
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 開発サーバーの起動
+pnpm dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`http://localhost:3000` にアクセスすると、イベント一覧画面が表示されます。
 
-## Deploy on Vercel
+## データベース設計
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+主なテーブルは以下の4つです。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **User**:ユーザー情報(主催者・参加者の区別なし)
+- **Event**:イベント情報
+- **Participation**:参加登録情報(User と Event の中間テーブル)
+- **Category**:イベントのカテゴリマスタ
+
+詳細なER図・テーブル定義は `docs/design-document.md` を参照してください。
+
+## 設計上の主な工夫
+
+- 参加人数や現在の申込状況は専用カラムを持たせず、関連テーブルの件数から都度算出することでデータの不整合を防止
+- イベントの削除は物理削除ではなく、ステータス管理による論理削除とし、履歴を保持
+- 参加登録・イベント作成など、複数のテーブル更新を伴う処理はトランザクションでまとめて実行
+- 入力値の検証はブラウザ標準の検証とサーバー側(yup)の検証の二段階で実施
+
+## 今後の拡張候補
+
+- 抽選による参加者選定機能(現バージョンは先着順のみ運用)
+- イベントへの画像添付機能
