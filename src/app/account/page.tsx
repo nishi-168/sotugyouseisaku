@@ -1,3 +1,4 @@
+// getRankはアカウントページにランクを表示させるため
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
@@ -11,6 +12,7 @@ import Link from "next/link";
 export default async function AccountPage({
     searchParams,
 }: {
+    // エラーメッセージと成功したかどうかを受け取っている
     searchParams: Promise<{ message?: string; success?: string}>;
 }) {
     const { message, success } = await searchParams;
@@ -26,13 +28,14 @@ export default async function AccountPage({
         where: { id: Number(userId) },
     });
 
+    // CookeiにはUserIdが残っていてDBからは削除されているようなありえない場合への備え
     if (!user) {
         notFound();
     }
 
     // 自分が参加したイベント一覧を作るにはEventではなく、Participationで探す必要がある
     // Eventテーブルには誰が参加したかの情報がないから
-    // ParticipationテーブルにはuserIdとeventIdが対応しておりそこかた詳細情報も一緒に取って来ている
+    // ParticipationテーブルにはuserIdとeventIdが対応していて、そこから詳細情報も一緒に取って来ている
     const participations = await prisma.participation.findMany({
         where: { userId: Number(userId) },
         include: {
@@ -48,8 +51,8 @@ export default async function AccountPage({
             ← イベント一覧に戻る
             </Link>
             <h1 className="text-2xl font-bold text-gray-900 mt-2 mb-6">アカウント情報</h1>
-            {message && <p>{decodeURIComponent(message)}</p>}
-            {success === "true" && <p className="bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2 mb-4">
+            {message && <p className="bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2 mb-4">{decodeURIComponent(message)}</p>}
+            {success === "true" && <p className="bg-green-50 text-green-700 border border-green-200 rounded px-3 py-2 mb-4">
                 更新しました
                 </p>}
             <form action={updateAccount}  className="space-y-4">
@@ -117,14 +120,14 @@ export default async function AccountPage({
             </p>
             </div>
 
-        <div className="mt-8"></div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">参加履歴</h2>
+        
+            <h2 className="text-lg font-semibold text-gray-900 mb-3 mt-8">参加履歴</h2>
                 <ul className="space-y-2">
                 {participations.map((participation) => (
                     <li key={participation.id}>
                     <Link href={`/participant/${participation.event.id}`}className="block border border-gray-200 rounded-lg p-3 bg-white hover:border-blue-300">
                         {participation.event.name}
-                        {/* statusがcancwelledであれば中止をイベント名の隣につける */}
+                        {/* statusがcancelledであれば中止をイベント名の隣につける */}
                         {participation.event.status === "cancelled" && (<span className="text-red-600 ml-2">(中止)</span>)}
                     </Link>
                     </li>
