@@ -1,7 +1,7 @@
 
 // DB操作、Cookie操作、リダイレクト、404表示、中止処理、Linkによるページ遷移などのインポート
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
+import { getCurrentUser } from "@/lib/session";
 import { redirect, notFound } from "next/navigation";
 import { cancelEvent } from "./actions";
 import Link from "next/link";
@@ -15,10 +15,9 @@ export default async function CancelEventPage({
   const { id } = await params;
 
 //   ログイン状態を確認している。中止という重要な操作をする前に誰が操作しているかを確定させる
-  const cookieStore = await cookies();
-  const userId = cookieStore.get("userId")?.value;
-// ログインしていなかったらログインへ
-  if (!userId) {
+  const user = await getCurrentUser();
+
+  if (!user) {
     redirect("/login");
   }
 // 指定されたIDのイベントを取得し、存在しなければ404ページを表示する
@@ -31,7 +30,7 @@ export default async function CancelEventPage({
   }
 // イベントの主催者IDと、今ログインしている人のIDを比較し一致しない場合は主催イベント一覧に追い返している
 // URLを直接いじって侵入されるのを防ぐため
-  if (event.organizerId !== Number(userId)) {
+  if (event.organizerId !== user.id ) {
     redirect(`/organizer?message=${encodeURIComponent("自分が主催するイベントのみ中止できます")}`);
   }
 

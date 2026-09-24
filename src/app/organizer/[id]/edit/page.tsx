@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { updateEvent } from "./actions";
 import Link from "next/link";
-
+import { getCurrentUser } from "@/lib/session";
 
 // この関数はDate型のデータを決まった書式に変換して渡す関数
 // defaultValueにはDate型のオブジェクトをそのまま渡すことができないから
@@ -27,11 +26,10 @@ export default async function EditEventpage({
     const { id } = await params;
     const { message } = await searchParams;
 
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("userId")?.value;
+    const user = await getCurrentUser();
 
-    if (!userId) {
-        redirect("/login");
+    if (!user) {
+      redirect("/login");
     }
 
     const event = await prisma.event.findUnique({
@@ -42,7 +40,7 @@ export default async function EditEventpage({
         notFound();
     }
 
-    if (event.organizerId !== Number(userId)) {
+    if (event.organizerId !== user.id) {
         redirect(`/organizer?message=${encodeURIComponent("自分が主催するイベントのみ編集できます")}`);
     }
 

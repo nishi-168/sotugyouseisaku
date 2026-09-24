@@ -1,9 +1,10 @@
 "use server";
 
-import { cookies } from "next/headers";
+
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import * as yup from "yup";
+import { getCurrentUser } from "@/lib/session";
 
 // バリデーションの定義
 const eventSchema = yup.object({
@@ -33,11 +34,10 @@ const eventSchema = yup.object({
 export async function createEvent(formData: FormData) {
     // イベント作成では未ログイン状態は許容せず、誰が作ったかがわかる必要があるため
     // CookieからuserIdを受け取って誰がログインしているかユーザーを確認している
-    const cookieStore = await cookies ();
-    const userId = cookieStore.get("userId")?.value;
-    // もしログインしていなかったらloginに戻す
-    if (!userId) {
-        redirect("/login");
+    const user = await getCurrentUser();
+
+    if (!user) {
+    redirect("/login");
     }
 
     // フォームから送られてきた７項目を１つのオブジェクトにまとめている
@@ -83,12 +83,12 @@ export async function createEvent(formData: FormData) {
             description: validatedData.description || null,
             categoryId: validatedData.categoryId,
             deadline: validatedData.deadline,
-            organizerId: Number(userId),
+            organizerId: user.id,
         },
     }),
     // レコードを作ったら主催者回数を１増やす
      prisma.user.update({
-        where: { id : Number(userId) },
+        where: { id : user.id },
         data: {hostedCount: {increment: 1} },
     }),
     ])

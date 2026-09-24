@@ -1,10 +1,10 @@
 // getRankはアカウントページにランクを表示させるため
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { updateAccount } from "./actions";
 import { getRank } from "@/lib/rank";
 import Link from "next/link";
+import { getCurrentUser } from "@/lib/session";
 
 
 // 内容やページレイアウトは新規登録とほぼ同じ
@@ -17,27 +17,17 @@ export default async function AccountPage({
 }) {
     const { message, success } = await searchParams;
 
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("userId")?.value;
+    const user = await getCurrentUser();
 
-    if (!userId) {
-        redirect("/login");
-    }
-
-    const user = await prisma.user.findUnique({
-        where: { id: Number(userId) },
-    });
-
-    // CookeiにはUserIdが残っていてDBからは削除されているようなありえない場合への備え
     if (!user) {
-        notFound();
+    redirect("/login");
     }
 
     // 自分が参加したイベント一覧を作るにはEventではなく、Participationで探す必要がある
     // Eventテーブルには誰が参加したかの情報がないから
     // ParticipationテーブルにはuserIdとeventIdが対応していて、そこから詳細情報も一緒に取って来ている
     const participations = await prisma.participation.findMany({
-        where: { userId: Number(userId) },
+        where: { userId: user.id },
         include: {
             event: true,
         },
@@ -123,7 +113,9 @@ export default async function AccountPage({
         
             <h2 className="text-lg font-semibold text-gray-900 mb-3 mt-8">参加履歴</h2>
                 <ul className="space-y-2">
+                    {/* findManyで複数件取得してるので配列判定 */}
                 {participations.map((participation) => (
+                    // Reactが判定しやすいようにKeyをつける
                     <li key={participation.id}>
                     <Link href={`/participant/${participation.event.id}`}className="block border border-gray-200 rounded-lg p-3 bg-white hover:border-blue-300">
                         {participation.event.name}

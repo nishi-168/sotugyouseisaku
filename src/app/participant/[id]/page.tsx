@@ -5,10 +5,9 @@
 import { prisma } from "@/lib/prisma";
 // 404を出すための関数
 import { notFound } from "next/navigation";
-
-import { cookies } from "next/headers";
 import { participate } from "./actions";
 import Link from "next/link";
+import { getCurrentUser } from "@/lib/session";
 
 // ルートパラメーターとクエリパラメータの両方を受け取る関数
 // [id]などでどのイベントか判断しつつ　？以降のエラー内容なども受け取っている
@@ -47,11 +46,12 @@ export default async function EventDetailPage({
         notFound();
     }
 // cookieから今この画面を見ている人が誰かを読み取っている
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("userId")?.value;
+    const user = await getCurrentUser();
+
+    const isOrganizer = user && event.organizerId === user.id;
 
     // ログイン済みのユーザーかつそのIDがこのイベントの主催者と一致するか
-    const isOrganizer = userId && event.organizerId === Number(userId);
+
     // 現在の参加人数が定員に達しているかどうかを判断する
     const isFull = event._count.participations >= event.capacity;
 
