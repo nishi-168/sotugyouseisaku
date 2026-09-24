@@ -1,9 +1,10 @@
 // 主催イベント一覧
 // notFoundは必要なし　このページには存在確認が必要な特定の1件のデータを扱う処理がないため
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
+
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getCurrentUser } from "@/lib/session";
 
 // 今回はparamsの[id]部分は受け取っていない　特定の一意のデータを扱わないから
 export default async function OrganizerPage({
@@ -13,17 +14,16 @@ export default async function OrganizerPage({
     }) {
     const { cancelled , message } = await searchParams;
     
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("userId")?.value;
+    const user = await getCurrentUser();
 
-    if(!userId) {
-        redirect("/login");
+    if (!user) {
+    redirect("/login");
     }
 
     // 参加者タブでの一覧ページと似た取り方をしているが、今回は自分が主催したイベントだけ表示させたいのでorganizerIdを貰ってきている
     // 今回ここでactivの条件がないのは中止したイベントも取得して表示させたかったから
     const events = await prisma.event.findMany({
-        where: {organizerId: Number(userId) },
+        where: {organizerId: user.id },
         include: {
             category: true,
             _count: {

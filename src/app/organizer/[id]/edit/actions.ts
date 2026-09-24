@@ -1,7 +1,7 @@
 "use server"
 
 
-import { cookies } from "next/headers";
+import { getCurrentUser } from "@/lib/session";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import * as yup from "yup";
@@ -36,10 +36,9 @@ const eventSchema = yup.object({
 // どのイベントを更新するかという情報が必要なため
 // formDataにはどのイベントかという情報は含まれていないから
 export async function updateEvent(eventId: number, formData: FormData) {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("userId")?.value;
+    const user = await getCurrentUser();
 
-    if (!userId) {
+  if (!user) {
     redirect("/login");
   }
 //   編集しようとしているイベントが存在する確認し、そのイベントの主催者が今ログインしている本人かどうかを確認している
@@ -53,7 +52,7 @@ export async function updateEvent(eventId: number, formData: FormData) {
     notFound();
   }
 
-  if (event.organizerId !== Number(userId)) {
+  if (event.organizerId !== user.id) {
     redirect(`/organizer?message=${encodeURIComponent("自分が主催するイベントのみ編集できます")}`);
   }
 

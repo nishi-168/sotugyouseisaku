@@ -3,7 +3,7 @@
 // Cookieの確認　DBの更新　イベントの中止　これらはサーバー側で実行する必要がある
 "use server";
 
-import { cookies } from "next/headers";
+import { getCurrentUser } from "@/lib/session";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
@@ -11,14 +11,10 @@ import { prisma } from "@/lib/prisma";
 // eventIdはどのイベントを中止するか　formDataはフォームから送信されたデータ　今回フォームから送られてくるのはcancelReason＝中止理由
 export async function cancelEvent(eventId: number, formData: FormData) {
     
-    // Cookieからログインユーザーを取得
-    const cookieStore = await cookies();
-    // 今この中止操作をしているのは誰なのかを確認
-    const userId = cookieStore.get("userId")?.value;
+    const user = await getCurrentUser();
 
-    // ログインしていなけてばログインページにリダイレクトする
-    if(!userId) {
-        redirect("/login");
+    if (!user) {
+    redirect("/login");
     }
 
     // 中止しようとしているイベントが本当に存在するか　eventIdは一意なのでfindUnique
@@ -31,7 +27,7 @@ export async function cancelEvent(eventId: number, formData: FormData) {
     }
     // 編集機能と同じ考えで自分のイベントだけ注視できる
     // 権限チェック　Cookieから取得したuserIdを数字にしている
-    if (event.organizerId !== Number(userId)) {
+    if (event.organizerId !== user.id) {
         // リダイレクトの際エラーメッセージも送る
         redirect(`/organizer?message=${encodeURIComponent("自分が主催するイベントのみ中止できます")}`);
     }

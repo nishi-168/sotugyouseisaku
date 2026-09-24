@@ -100,8 +100,20 @@ export async function registerUser(formData: FormData) {
   });
 // そのままCookieにuseridをセットしている
 // そのままイベント一覧にいきログイン状態を保持している
-  const cookieStore = await cookies();
-  cookieStore.set("userId", user.id.toString());
+  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+
+const session = await prisma.session.create({
+  data: {
+    userId: user.id,
+    expiresAt,
+  },
+});
+
+const cookieStore = await cookies();
+cookieStore.set("sessionId", session.id, {
+  httpOnly: true,
+  expires: expiresAt,
+});
 
   redirect("/participant");
 }

@@ -1,9 +1,9 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import * as yup from "yup";
+import { getCurrentUser } from "@/lib/session";
 
 // 更新時のバリデーションを決めている部分　未来の日付もここでチェックするようにした
 const accountSchema = yup.object({
@@ -24,10 +24,9 @@ const accountSchema = yup.object({
 });
 
 export async function updateAccount(formData: FormData) {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get("userId")?.value;
+  const user = await getCurrentUser();
 
-  if (!userId) {
+  if (!user) {
     redirect("/login");
   }
 
@@ -69,7 +68,7 @@ export async function updateAccount(formData: FormData) {
       email: validatedData.email,
       // この条件をつけることで自分以外のuser.idが使っていないかだけを見ることができ
       // メールアドレスを変更しない場合にもエラーを出さずに更新できる
-      NOT: { id: Number(userId) },
+      NOT: { id: user.id },
     },
   });
 // 重複が見つかった場合のエラー
@@ -80,7 +79,7 @@ export async function updateAccount(formData: FormData) {
   // またCookieは新しく変更しない。アカウント情報を更新しても本人であることは変わらないため
   // Cookie関連のコードには触れていない
   await prisma.user.update({
-    where: { id: Number(userId) },
+    where: { id: user.id },
     data: {
       userName: validatedData.userName,
       birthDate: validatedData.birthDate,

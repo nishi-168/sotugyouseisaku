@@ -32,6 +32,7 @@ model User {
 
   organizedEvents       Event[] @relation("OrganizerEvents")
   participations        Participation[]
+  sessions              Session[]
 }
 
 model Event {
@@ -67,12 +68,21 @@ model Participation {
 
   eventId               Int
   event                 Event @relation(fields:[eventId], references:[id])
+  @@unique([userId,eventId])
 }
 
 model Category {
   id Int @id @default(autoincrement())
   name String @unique
   events Event[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 
