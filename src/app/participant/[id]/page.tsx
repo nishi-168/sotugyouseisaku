@@ -55,6 +55,8 @@ export default async function EventDetailPage({
     // 現在の参加人数が定員に達しているかどうかを判断する
     const isFull = event._count.participations >= event.capacity;
 
+    const isPastDeadline = event.deadline < new Date();
+
     return (
         <div className="max-w-md mx-auto px-4 py-10">
             <Link href="/participant" className="text-blue-600 hover:underline text-sm">
@@ -92,6 +94,10 @@ export default async function EventDetailPage({
                 このイベントは満員です</p>}
             {error === "already" && <p className="bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2 mb-4">
                 既にこのイベントに参加登録済みです</p>}
+            {error === "deadline" && <p className="bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2 mb-4">
+                    このイベントは申込期限を過ぎています</p>}
+            {error === "ended" && <p className="bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2 mb-4">
+                イベントは既に参加日時を過ぎています</p>}
             {error === "organizer" && <p className="bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2 mb-4">
                 自分が主催するイベントには参加できません</p>}
             {/* 主催者かどうか */}
@@ -102,14 +108,14 @@ export default async function EventDetailPage({
                 // この関数が実行されたらeventIdには今見ているeventIdを使ってという意味
                 // 参加フォームには入力項目がなくどのイベントに参加するか示す必要があるため
                 <form action={participate.bind(null,event.id)}>
-                    <button type="submit" disabled={isFull}
+                    <button type="submit" disabled={isFull || isPastDeadline}
                         className={
-                            isFull
+                            isFull || isPastDeadline
                             ? "bg-gray-300 text-gray-500 px-4 py-2 rounded w-full cursor-not-allowed"
                             : "bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700"
                         }
                         >
-                            {isFull ? "満員です" : "参加する"}
+                            {isPastDeadline ? "受付終了" : isFull ? "満員です" : "参加する"}
                     </button>
                 </form>
             )}

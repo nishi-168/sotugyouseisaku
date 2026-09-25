@@ -190,6 +190,16 @@ export async function participate(eventId: number) {
     redirect(`/participant/${eventId}?error=organizer`);
   }
 
+  const now = new Date();
+
+  if (event.deadline < now ){
+    redirect(`/participant/${eventId}?error=deadline`)
+  }
+
+  if (event.eventDatetime < now ) {
+    redirect(`/participant/${eventId}?error=ended`);
+  }
+
   try {
     await prisma.$transaction(async (tx) => {
       const currentCount = await tx.participation.count({

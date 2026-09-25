@@ -25,7 +25,9 @@ export default async function ParticipantHomePage({
     const events = await prisma.event.findMany({
     // whereを追加　findManyが最初から開催中のイベントだけを取得するようになり、中止されたイベントは参加者タブには表示されなくなる
     // events.filter()などで絞るのではなくてそもそも必要ないデータは持って来させないようにしている
-        where: { status: "active" },
+        where: { status: "active",
+            eventDatetime: {gte: new Date() },
+         },
         // Eventテーブルに紐づいている外部テーブルのデータも一緒に取得するinclude 数字ではなくて日本語で表示したいから
         include: {
             category: true,
