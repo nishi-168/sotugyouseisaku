@@ -13,6 +13,7 @@ const eventSchema = yup.object({
   eventDatetime: yup
     .date()
     .typeError("開催日を正しく入力してください")
+    .min(new Date(),"開催日は現在時刻より後の日時にしてください")
     .required("開催日を入力してください"),
   capacity: yup
     .number()
@@ -27,6 +28,7 @@ const eventSchema = yup.object({
   deadline: yup
     .date()
     .typeError("申込期限を正しく入力してください")
+    .min(new Date(), "申込期限は現在より後の日時にしてください")
     .required("申込期限を入力してください"),
 });
 
